@@ -1,4 +1,5 @@
 import argparse
+import pickle
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
@@ -50,34 +51,48 @@ def is_summer(ds):
 
 
 def predict(weather_frcst):
+  predictions = []
   for identifier in targets:
     point = weather_frcst.sel(lat=gauges.loc[identifier].lat,
                               lon=gauges.loc[identifier].lon,
                               method='nearest'
                               )
-    future = point.to_dataframe()
+    future = point.to_dataframe().reset_index()
+    future = future.rename(
+        {i: "ds" for i in future.columns if i.startswith("time")}, axis=1)
+    future = future.rename({
+        'Temperature_surface': 'temperature_ground',
+        'Temperature_isobaric': 'temperature_air',
+        'Precipitation_rate_surface': 'precipitation_amount'
+    }, axis=1)
 
-    future = future.reset_index().rename({
-      'time3': 'ds',
-      'Temperature_surface': 'temperature_ground',
-      'Temperature_isobaric': 'temperature_air',
-      'Precipitation_rate_surface': 'precipitation_amount'
-    }, axis=1).resample('D')\
-      .agg({
-        'precipitation_amount': 'sum',
-        'temperature_air': 'mean', 'temperature_ground': 'mean'
-    })
+    future = future.set_index('ds').resample('D')\
+        .agg({
+            'precipitation_amount': 'sum',
+            'temperature_air': 'mean', 'temperature_ground': 'mean'
+        })
+
+    future = future.reset_index()
+    future['temperature_air'] = future.temperature_air - 273.15
+    future['temperature_ground'] = future.temperature_ground - 273.15
+
     future['spring'] = future['ds'].apply(is_spring)
     future['summer'] = future['ds'].apply(is_summer)
 
-    print(future)
-    with open(f'./models{identifier.pkl}', 'r') as f:
+    with open(f'./models/{int(identifier)}.pkl', 'rb') as f:
       forecaster = pickle.load(f)
-      forecast = p.predict(future)
-    print(forecast)
+      forecast = forecaster.predict(future)
+      sf = forecast.set_index('ds').yhat.rename('5012')
+      predictions.append(sf)
+
+  return predictions
 
 
 weather_frcst = get_weather_forecast(f_day, l_day)
-# future = pd.date_range(f_day, l_day).to_series(name='ds').reset_index().drop('index', axis=1)
 gauges = gauges_coords(targets)
 predictions = predict(weather_frcst)
+
+submission = pd.DataFrame(predictions).T
+submission.to_csv('submission.csv')
+
+print(predictions)
