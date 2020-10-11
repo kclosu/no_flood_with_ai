@@ -3,7 +3,7 @@
 ### What information is contained in this repository?
 * [Jupyter notebook](https://github.com/kclosu/no_flood_with_ai/blob/main/no_floods_with_ai.ipynb)  that contains the steps of implementing a predictive model and has any descriptive comments that would help explain the working of the submitted solution
 * [Dockerfile](https://github.com/kclosu/no_flood_with_ai/blob/main/Dockerfile) and [forecast.py](https://github.com/kclosu/no_flood_with_ai/blob/main/forecast.py) those are needed to run your machine learning code
-*  [Abstracts](https://github.com/kclosu/no_flood_with_ai/blob/main/abstracts.pdf) describing the approach
+*  [Abstracts](https://github.com/kclosu/no_flood_with_ai/blob/main/abstracts.pdf) describing the approach. Any formats are accepted.
 
 
 ### The testing process
