@@ -15,7 +15,7 @@ RUN git clone https://github.com/OSGeo/proj.4.git \
   && make install
 
 RUN pip install --upgrade pip && \
-  pip install Cython numpy scipy pandas convertdate lunarcalendar && \
+  pip install Cython numpy scipy pandas convertdate lunarcalendar h5py && \
   rm -fr /root/.cache
 
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal

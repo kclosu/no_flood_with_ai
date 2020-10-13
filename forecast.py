@@ -1,8 +1,8 @@
 import argparse
 import pickle
+import xarray as xr
 import pandas as pd
 import geopandas as gpd
-import xarray as xr
 from siphon.catalog import TDSCatalog
 
 parser = argparse.ArgumentParser()
@@ -35,7 +35,7 @@ def get_weather_forecast(start, end):
   query = ncss.query().variables(*forecastvariables)
   query.time_range(start, end).accept('netCDF4')
   nc = ncss.get_data(query)
-  fds = xr.open_dataset(xr.backends.NetCDF4DataStore(nc))
+  fds = xr.open_dataset(xr.backends.NetCDF4DataStore(nc))  # TODO: try H5NetCDFStore backend
   fds = fds.sel(isobaric6=100000)
   return fds
 
